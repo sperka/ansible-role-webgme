@@ -1,0 +1,8 @@
+# git
+- src: geerlingguy.git
+
+# nodejs with nvm -- for versions see defaults
+- src: leonidas.nvm
+
+# mongodb
+- src: Stouts.mongodb

@@ -1,0 +1,43 @@
+---
+# tasks file for webgme
+
+- name: "Set repo variable properly"
+  set_fact:
+    repo_full_url: "https://{{ webgme_flavor.git_repo_username }}:{{ webgme_flavor.git_repo_password }}@{{ webgme_flavor.git_repo_url }}"
+  when: "{{ webgme_flavor.git_repo_username }} is defined"
+
+# - set_fact:
+#     repo_full_url: "https://{{ webgme_flavor.git_repo_url }}"
+#   when: "{{ webgme_flavor.git_repo_username }} is not defined"
+
+- name: "Install pm2 globally"
+  npm:
+    name: pm2
+    global: yes
+    production: yes
+
+- name: "Clone webgme flavor git repo"
+  become: yes
+  git:
+    repo: "{{ repo_full_url }}"
+    version: "{{ webgme_flavor.git_repo_branch }}"
+    dest: "{{ webgme_local_path }}"
+    update: yes
+    force: yes
+
+- name: "Install npm packages in the cloned folder based on package.json"
+  npm:
+    path: "{{ webgme_local_path }}"
+
+- name: "Stop app"
+  become: yes
+  command: "pm2 stop {{ webgme_app_name }}"
+  args:
+    chdir: "{{ webgme_local_path }}"
+  ignore_errors: yes
+
+- name: "Start app"
+  become: yes
+  command: "pm2 start --name {{ webgme_app_name }} npm -- start"
+  args:
+    chdir: "{{ webgme_local_path }}"

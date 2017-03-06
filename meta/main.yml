@@ -1,0 +1,30 @@
+galaxy_info:
+  author: sperka
+  description: Ansible role to install WebGME
+  company: WebGME
+  issue_tracker_url: https://github.com/webgme/ansible-role-webgme/issues/
+  license: MIT
+  min_ansible_version: 2.0
+
+  platforms:
+    - name: Ubuntu
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - wheezy
+
+  galaxy_tags:
+    - "WebGME"
+    - "modeling"
+    - "generic modeling environment"
+
+dependencies:
+  # git
+  - src: geerlingguy.git
+
+  # nodejs with nvm -- for versions see defaults
+  - src: leonidas.nvm
+
+  # mongodb
+  - src: Stouts.mongodb
