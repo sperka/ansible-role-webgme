@@ -3,25 +3,10 @@
 # Example playbook for ansible-role-webgme
 
 - hosts: all
-  vars_prompt:
-    - name: git_username
-      prompt: "Enter your vulcan git username"
-      private: no
-    - name: git_password
-      prompt: "Enter your vulcan git password"
-      private: yes
-  tasks:
-    - set_fact:
-        webgme_flavor:
-          git_repo_username: "{{ git_username }}"
-          git_repo_password: "{{ git_password }}"
-
-- hosts: all
   become: yes
   roles:
     - role: ansible-role-webgme
       vars:
         webgme_flavor:
-            git_repo_username: "{{ git_username }}"
-            git_repo_password: "{{ git_password }}"
-            git_repo_url: "git.vulcan.isis.vanderbilt.edu/projects/c2wtng/c2wtng-meta"
+            git_repo_url: "https://github.com/webgme/finite-state-machine.git"
+            git_repo_branch: HEAD

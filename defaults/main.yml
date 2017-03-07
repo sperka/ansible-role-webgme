@@ -1,12 +1,6 @@
 ---
 # defaults file for webgme
 
-# nvm + nodejs default settings
-nvm:
-  user: "{{ ansible_user }}"
-  version: v0.33.0
-  node_version: 6.9.4
-
 # mongodb settings
 mongodb_conf_bind_ip: 127.0.0.1
 mongodb_conf_dbpath: /data/db
@@ -14,13 +8,12 @@ mongodb_conf_port: 27017
 mongodb_user: mongodb
 mongodb_version: "3.2.4"
 
-webgme_port: 8888
+# webgme_flavor:
+#    git_repo_url: github.com/username/repo.git
+#    git_repo_branch: HEAD
+#    git_repo_key: ~/.ssh/id_rsa
 
-webgme_flavor:
-    # git_repo_username: <username>
-    # git_repo_password: <password>
-    git_repo_branch: HEAD
-    # git_repo_url: github.com/username/repo.git
-
-webgme_local_path: /opt/webgme
 webgme_app_name: webgme
+webgme_node_version: 6.9.4
+webgme_nvm_version: v0.33.0
+# webgme_port: 8888

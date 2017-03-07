@@ -1,0 +1,6 @@
+---
+- hosts: localhost
+  become_user: root
+  become: true
+  roles:
+    - ansible-role-webgme

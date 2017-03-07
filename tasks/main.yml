@@ -1,43 +1,106 @@
 ---
 # tasks file for webgme
 
-- name: "Set repo variable properly"
-  set_fact:
-    repo_full_url: "https://{{ webgme_flavor.git_repo_username }}:{{ webgme_flavor.git_repo_password }}@{{ webgme_flavor.git_repo_url }}"
-  when: "{{ webgme_flavor.git_repo_username }} is defined"
+- set_fact:
+    node_path: "/home/{{ ansible_user }}/.nvm/versions/node/v{{ webgme_node_version }}/bin:{{ ansible_env.PATH }}"
+    ssh_dir: "/home/{{ ansible_user }}/.ssh"
+    webgme_local_path: "/home/{{ ansible_user }}/webgme"
 
-# - set_fact:
-#     repo_full_url: "https://{{ webgme_flavor.git_repo_url }}"
-#   when: "{{ webgme_flavor.git_repo_username }} is not defined"
+- set_fact:
+    git_repo_keyfile_remote: "{{ ssh_dir }}/git_keyfile"
 
-- name: "Install pm2 globally"
-  npm:
-    name: pm2
-    global: yes
-    production: yes
 
-- name: "Clone webgme flavor git repo"
-  become: yes
+# >> npm ansible module fails since version 2.0.2 <<
+# - name: "Install pm2 globally"
+#   become: yes
+#   npm:
+#     name: "{{ item }}"
+#     executable: "{{ npm_executable }}"
+#     global: yes
+#     production: yes
+#   with_items:
+#     - pm2
+#     - npm-install-peers
+#     - bower
+
+- name: "Install pm2, bower and npm-install-peers globally"
+  command: "npm install -g pm2 npm-install-peers bower"
+  environment:
+    PATH: "{{ node_path }}"
+
+################################################################################
+# this part only needed if git repo is private
+###
+- name: "Copy git.sh"
+  copy:
+    src: "git.sh"
+    dest: "{{ ssh_dir }}/git.sh"
+    mode: 0744
+  when: "{{ webgme_flavor.git_repo_key is defined }}"
+
+- name: "Copy keyfile for git repo"
+  copy:
+    src: "{{ webgme_flavor.git_repo_key }}"
+    dest: "{{ git_repo_keyfile_remote }}"
+    mode: 0600
+  when: "{{ webgme_flavor.git_repo_key is defined }}"
+
+- name: "Clone webgme flavor git repo with key"
   git:
-    repo: "{{ repo_full_url }}"
+    repo: "{{ webgme_flavor.git_repo_url }}"
     version: "{{ webgme_flavor.git_repo_branch }}"
     dest: "{{ webgme_local_path }}"
+    key_file: "{{ git_repo_keyfile_remote }}"
     update: yes
     force: yes
+  environment:
+    GIT_SSH: "{{ ssh_dir }}/git.sh"
+    PKEY: "{{ git_repo_keyfile_remote }}"
+  when: "{{ webgme_flavor.git_repo_key is defined }}"
+###
+# -
+################################################################################
 
-- name: "Install npm packages in the cloned folder based on package.json"
-  npm:
-    path: "{{ webgme_local_path }}"
+- name: "Clone webgme flavor git repo - no key"
+  git:
+    repo: "{{ webgme_flavor.git_repo_url }}"
+    version: "{{ webgme_flavor.git_repo_branch }}"
+    dest: "{{ webgme_local_path }}"
+    accept_hostkey: yes
+    update: yes
+    force: yes
+  when: "{{ webgme_flavor.git_repo_key is not defined }}"
+
+# >> npm ansible module fails since version 2.0.2 <<
+# - name: "Install npm packages in cloned folder based on package.json"
+#   npm:
+#     executable: "{{ npm_executable }}"
+#     path: "{{ webgme_local_path }}"
+- name: "Install npm packages in cloned folder based on package.json"
+  command: "npm install"
+  args:
+    chdir: "{{ webgme_local_path }}"
+  environment:
+    PATH: "{{ node_path }}"
+
+- name: "Install peer dependencies"
+  command: "npm-install-peers"
+  args:
+    chdir: "{{ webgme_local_path }}"
+  environment:
+    PATH: "{{ node_path }}"
 
 - name: "Stop app"
-  become: yes
   command: "pm2 stop {{ webgme_app_name }}"
   args:
     chdir: "{{ webgme_local_path }}"
+  environment:
+    PATH: "{{ node_path }}"
   ignore_errors: yes
 
 - name: "Start app"
-  become: yes
-  command: "pm2 start --name {{ webgme_app_name }} npm -- start"
+  command: "pm2 start --name {{ webgme_app_name }} app.js"
   args:
     chdir: "{{ webgme_local_path }}"
+  environment:
+    PATH: "{{ node_path }}"

@@ -1,38 +1,71 @@
-Role Name
-=========
+Ansible Role: WebGME
+====================
 
-A brief description of the role goes here.
+Installs [WebGME](https://webgme.org) - [Webgme Github](https://github.com/webgme/webgme).
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+This role supports **only Ubuntu Linux**. Feel free to extend it to other platforms.
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+#### Default variables:
+
+**MongoDB**:
+
+*   `mongodb_conf_bind_ip` - Bind ip for mongodb
+*   `mongodb_conf_dbpath` - Path to DB data files
+*   `mongodb_conf_port` - Mongo port
+*   `mongodb_user` - Mongo user
+*   `mongodb_version` - Version
+
+**WebGME**:
+
+*   `webgme_app_name` - Name of the application
+*   `webgme_node_version` - Node.js version to use
+*   `webgme_nvm_version` - nvm version to use
+
+
+#### Playbook variables:
+
+*   `webgme_flavor.git_repo_url` - The URL for the git repository where the flavor code resides
+*   `webgme_flavor.git_repo_branch` - Which branch to clone
+*   `webgme_flavor.git_repo_key` _[optional]_ - The path to the private key (on local machine, it is copied to remote host)
+
+**IMPORTANT:** In case you use `webgme_flavor.git_repo_key` it must **NOT** have a passphrase, otherwise won't work.
+
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+*   `geerlingguy.git`
+*   `leonidas.nvm`
+*   `Stouts.mongodb`
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+An example playbook that installs all dependencies and starts running the `finite-state-machine` flavor:
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+```ansible
+- hosts: all
+  become: yes
+  roles:
+    - role: ansible-role-webgme
+      vars:
+        webgme_flavor:
+            git_repo_url: "https://github.com/webgme/finite-state-machine.git"
+            git_repo_branch: HEAD
+```
 
 License
 -------
 
-BSD
+MIT
 
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+[https://github.com/sperka](https://github.com/sperka)

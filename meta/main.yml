@@ -25,6 +25,10 @@ dependencies:
 
   # nodejs with nvm -- for versions see defaults
   - src: leonidas.nvm
+    nvm:
+      user: "{{ ansible_user }}"
+      version: "{{ webgme_nvm_version }}"
+      node_version: "{{ webgme_node_version }}"
 
   # mongodb
   - src: Stouts.mongodb
