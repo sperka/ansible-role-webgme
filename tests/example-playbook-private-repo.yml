@@ -1,0 +1,13 @@
+---
+
+# Example playbook for ansible-role-webgme
+
+- hosts: all
+  become: yes
+  roles:
+    - role: ansible-role-webgme
+      vars:
+        webgme_flavor:
+            git_repo_url: "ssh://user@my.private.repo.com/projects/my-flavor"
+            git_repo_branch: HEAD
+            git_repo_key: "~/.ssh/git_keyfile"
