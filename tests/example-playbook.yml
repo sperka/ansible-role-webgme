@@ -3,7 +3,6 @@
 # Example playbook for ansible-role-webgme
 
 - hosts: all
-  become: yes
   roles:
     - role: ansible-role-webgme
       vars:

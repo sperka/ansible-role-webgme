@@ -2,11 +2,18 @@
 # tasks file for webgme
 
 - set_fact:
-    node_path: "/home/{{ ansible_user }}/.nvm/versions/node/v{{ webgme_node_version }}/bin:{{ ansible_env.PATH }}"
-    ssh_dir: "/home/{{ ansible_user }}/.ssh"
-    webgme_local_path: "/home/{{ ansible_user }}/webgme"
+    user_home: "/home/{{ ansible_user }}"
+    curr_user: "{{ ansible_user }}"
 
 - set_fact:
+    node_path: "{{ user_home }}/.nvm/versions/node/v{{ webgme_node_version }}"
+    ssh_dir: "{{ user_home }}/.ssh"
+    webgme_local_path: "{{ user_home }}/{{ webgme_app_name }}"
+
+- set_fact:
+    node_bin: "{{ node_path }}/bin"
+    node_env_path: "{{ node_path }}/bin:{{ ansible_env.PATH }}"
+    node_modules_global: "{{ node_path }}/lib/node_modules"
     git_repo_keyfile_remote: "{{ ssh_dir }}/git_keyfile"
 
 
@@ -26,7 +33,7 @@
 - name: "Install pm2, bower and npm-install-peers globally"
   command: "npm install -g pm2 npm-install-peers bower"
   environment:
-    PATH: "{{ node_path }}"
+    PATH: "{{ node_env_path }}"
 
 ################################################################################
 # this part only needed if git repo is private
@@ -81,26 +88,35 @@
   args:
     chdir: "{{ webgme_local_path }}"
   environment:
-    PATH: "{{ node_path }}"
+    PATH: "{{ node_env_path }}"
 
 - name: "Install peer dependencies"
   command: "npm-install-peers"
   args:
     chdir: "{{ webgme_local_path }}"
   environment:
-    PATH: "{{ node_path }}"
+    PATH: "{{ node_env_path }}"
+
+- name: "Copy node-app.json to root"
+  template:
+    src: node-app.json.j2
+    dest: "{{ user_home }}/node-app.json"
 
 - name: "Stop app"
-  command: "pm2 stop {{ webgme_app_name }}"
+  command: "pm2 stop node-app.json"
   args:
     chdir: "{{ webgme_local_path }}"
   environment:
-    PATH: "{{ node_path }}"
+    PATH: "{{ node_env_path }}"
   ignore_errors: yes
 
 - name: "Start app"
-  command: "pm2 start --name {{ webgme_app_name }} app.js"
+  command: "pm2 start node-app.json"
   args:
-    chdir: "{{ webgme_local_path }}"
+    chdir: "{{ user_home }}"
   environment:
-    PATH: "{{ node_path }}"
+    PATH: "{{ node_env_path }}"
+
+- name: "Ensure pm2 starts when vm restarts"
+  become: yes
+  command: "env PATH=$PATH:{{ node_bin }} {{ node_modules_global }}/pm2/bin/pm2 startup -u {{ curr_user }}"

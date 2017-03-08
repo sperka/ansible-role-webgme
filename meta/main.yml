@@ -22,9 +22,11 @@ galaxy_info:
 dependencies:
   # git
   - src: geerlingguy.git
+    become: yes
 
   # nodejs with nvm -- for versions see defaults
   - src: leonidas.nvm
+    become: yes
     nvm:
       user: "{{ ansible_user }}"
       version: "{{ webgme_nvm_version }}"
@@ -32,3 +34,4 @@ dependencies:
 
   # mongodb
   - src: Stouts.mongodb
+    become: yes
