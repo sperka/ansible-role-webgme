@@ -1,0 +1,32 @@
+---
+language: python
+python: "2.7"
+
+sudo: required
+
+# Install ansible
+addons:
+  apt:
+    packages:
+    - python-pip
+
+install:
+  # Install ansible
+  - pip install ansible
+
+  # Check ansible version
+  - ansible --version
+
+  # install dependencies
+  - ansible-galaxy install -r tests/requirements.yml -p tests/dependencies
+
+  # Create ansible.cfg with correct roles_path
+  - printf '[defaults]\nhost_key_checking=False\nroles_path=../:tests/dependencies' >ansible.cfg
+
+
+script:
+  # Basic role syntax check
+  - ansible-playbook tests/travis-test.yml -i tests/travis-inventory --syntax-check
+
+  # Run the role/playbook with ansible-playbook.
+  - ansible-playbook tests/travis-test.yml -i tests/travis-inventory --connection=local
