@@ -51,7 +51,6 @@ An example playbook that installs all dependencies and starts running the `finit
 
 ```ansible
 - hosts: all
-  become: yes
   roles:
     - role: ansible-role-webgme
       vars:
