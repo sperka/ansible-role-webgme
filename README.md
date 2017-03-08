@@ -40,9 +40,9 @@ Role Variables
 Dependencies
 ------------
 
-*   `geerlingguy.git`
-*   `leonidas.nvm`
-*   `Stouts.mongodb`
+*   `geerlingguy.git` [github](https://github.com/geerlingguy/ansible-role-git) | [galaxy](https://galaxy.ansible.com/geerlingguy/git/)
+*   `leonidas.nvm` [github](https://github.com/leonidas/ansible-nvm) | [galaxy](https://galaxy.ansible.com/leonidas/nvm/)
+*   `Stouts.mongodb` [github](https://github.com/Stouts/Stouts.mongodb) | [galaxy](https://galaxy.ansible.com/Stouts/mongodb/)
 
 Example Playbook
 ----------------
