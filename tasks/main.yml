@@ -58,6 +58,7 @@
     version: "{{ webgme_flavor.git_repo_branch }}"
     dest: "{{ webgme_local_path }}"
     key_file: "{{ git_repo_keyfile_remote }}"
+    accept_hostkey: yes
     update: yes
     force: yes
   environment:
